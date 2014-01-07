@@ -8,9 +8,8 @@ var socket = io.connect("http://localhost:9000");
 
 socket.on("tweet", function(data){
   var d =  JSON.parse(data);
-  
-  console.log(d);
-})
+  console.log( d.text );
+});
 
 // var projection = d3.geo.mercator().translate([550, 300]).scale(100);
 
