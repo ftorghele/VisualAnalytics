@@ -1,8 +1,10 @@
 {
-  "name": "VisualAnalytics",
+
+  "name": "VisualAnalyticsLabProject",
   "version": "0.0.1",
   "authors": [
-    "Franz Torghele <franz@torghele.at>"
+    "Franz Torghele <franz@torghele.at>",
+    "Wolfgang Vogl <wuulf01@yahoo.de>"
   ],
   "main": "index.html",
   "license": "MIT",
