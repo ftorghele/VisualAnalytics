@@ -16,9 +16,8 @@ var stream = twitter.stream('statuses/filter', { locations: area });
 
 stream.on('tweet', function (tweet) {
   if (tweet.geo != null && tweet.text != null && tweet.place != null && tweet.place.country_code != null) {
-    console.log(tweet.geo)
     io.on('connection', function(socket){
-      socket.emit("tweet", JSON.stringify('{"text":'+tweet.text+',"geo":'+tweet.geo+',"country":'+tweet.place.country_code+'}') );  
+      socket.emit("tweet", JSON.stringify({"text":""+tweet.text+"","geo":""+tweet.geo+"","country":""+tweet.place.country_code+""}) );  
     });
   }
     // db.tweets.save({
