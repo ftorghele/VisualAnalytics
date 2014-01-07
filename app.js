@@ -1,16 +1,14 @@
-
-/**
- * Module dependencies.
- */
-
+var config = require('./config.js');
+var smileys = require('./smiley.js');
+var Twit = require('twit');
+var io = require('socket.io');
 var express = require('express');
 var routes = require('./routes');
 var http = require('http');
 var path = require('path');
 
+// Express
 var app = express();
-
-// all environments
 app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -22,31 +20,16 @@ app.use(express.methodOverride());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
-// development only
-if ('development' == app.get('env')) {
-  app.use(express.errorHandler());
-}
-
 app.get('/', routes.index);
 
-http.createServer(app).listen(app.get('port'), function(){
+var server = http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
 
-var config = require('./config.js');
-var Twit = require('twit');
-var io = require('socket.io');
+// Socket.io
+var sockets = io.listen(server, { log: false });
 
-//Start a Socket.IO listen
-var sockets = io.listen(9000);
- 
-//Set the sockets.io configuration.
-//THIS IS NECESSARY ONLY FOR HEROKU!
-sockets.configure(function() {
-  sockets.set('transports', ['xhr-polling']);
-  sockets.set('polling duration', 10);
-});
-
+// Twitter
 var twitter = new Twit({
     consumer_key: config.CONSUMER_KEY
   , consumer_secret: config.CONSUMER_SECRET
@@ -54,12 +37,26 @@ var twitter = new Twit({
   , access_token_secret: config.ACCESS_TOKEN_SECRET
 });
 
-var stream = twitter.stream('statuses/filter', { track: [':)', ':(', ':D', ':p', 'xD', ':))', ':((', ':-)', ':-(', ":'(" ] });
+var keys = [];
+for(var smiley in smileys) keys.push(smiley);
+
+var stream = twitter.stream('statuses/filter', { track: keys });
 
 sockets.sockets.on('connection', function(socket){
   stream.on('tweet', function (tweet) {
     if (tweet.text != null && tweet.place != null && tweet.place.country_code != null) {
-      socket.emit("tweet", JSON.stringify({ text: tweet.text, country: tweet.place.country_code}) );  
+      var tokens = tweet.text.split(" ");
+      var sentiment = 0;
+      tokens.forEach(function(token) {
+        for ( var smiley in smileys ) {
+          if (smiley == token) {
+            sentiment = smileys[smiley];
+            break;
+          }
+        }
+      });
+      socket.emit("tweet", JSON.stringify({ code: tweet.place.country_code, sentiment: sentiment }) );  
     }
   });
 });
+
