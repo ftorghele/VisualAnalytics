@@ -1,0 +1,17 @@
+{
+  "name": "VisualAnalyticsLabProject",
+  "version": "0.0.1",
+  "authors": [
+    "Franz Torghele <franz@torghele.at>"
+  ],
+  "main": "index.html",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "bootstrap": "~3.0.2",
+    "jquery": "~2.0.3",
+    "d3": "~3.3.10",
+    "topojson": "0.0.12",
+    "queue-async": "*"
+  }
+}
