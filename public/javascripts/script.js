@@ -32,9 +32,11 @@ var width = "100%",
     max_sentiment = 0,
     min_sentiment = 0;
 
+
 var countrySentimentArr = {};
 
-var socket = io.connect("http://localhost:9000");
+
+var socket = io.connect();
 
 socket.on("tweet", function(d){
   var data = JSON.parse(d);
