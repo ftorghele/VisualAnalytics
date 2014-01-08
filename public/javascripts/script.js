@@ -1,6 +1,7 @@
 var maxSentiment    = 0,
     minSentiment    = 0,
-    tweetCount      = 0;
+    tweetCount      = 0
+    world_50m=null;
 
 var CountrySentiment = function(data, countryInfo){
     var that = this;
@@ -58,10 +59,10 @@ $(function () {
     var width = "100%",
         height = "80%";
 
-    var world_50m = {};
+   // world_50m = $.extend(true, {}, worldShape);
+    world_50m = JSON.stringify(worldShape);
     var countrySentimentDict = {};
     var countrySentimentDictNumericKey = {};
-    var countriesDict = {};
 
     var socket = io.connect();
 
@@ -81,18 +82,41 @@ $(function () {
             countrySentimentDict[data.code] = cs;
             countrySentimentDictNumericKey[ parseInt(countryNameDict[data.code][0]) ] = cs;
         }
-        console.log( countrySentimentDictNumericKey[countryNameDict[data.code][0]] )
     }
 
     var update = function(){
+        var countriesDict = {};
 
         for(var key in countrySentimentDict){
-            console.log(countrySentimentDict[key].count);
-            //createCountriesDict
+            //TODO: create real countriesDict dynamically!!
+            countriesDict = {
+                "MY": {
+                    "avg_sentiment": 0.4475893166840097,
+                    "sentiment": 6452,
+                    "sentiment_count": 14415
+                },
+                "GB": {
+                    "avg_sentiment": 0.5393266632585992,
+                    "sentiment": 22155,
+                    "sentiment_count": 41079
+                },
+                "ID": {
+                    "avg_sentiment": 0.5104348939439205,
+                    "sentiment": 23920,
+                    "sentiment_count": 46862
+                },
+                "US": {
+                    "avg_sentiment": 0.4419314237766505,
+                    "sentiment": 34761,
+                    "sentiment_count": 78657
+                }
+            }
         }
+
+        //console.log(world_50m)
         
         queue()
-          .defer(d3.json, world_50m)
+          .defer(d3.json, JSON.parse(world_50m))
           .defer(d3.json, worldCountryNames)
           .defer(d3.json, countriesDict)
           .await(ready);
@@ -165,7 +189,7 @@ $(function () {
 
       country
         .on("mousedown", function(d,i){
-            $("#infobox").html("<b>" + d.name + ":</b> " +i+" "+ JSON.stringify(countrySentimentDictNumericKey[i].countryName) );
+            $("#infobox").html("<b>" + d.name + ":</b> " +i ); //+" "+ JSON.stringify(countrySentimentDictNumericKey[i].countryName) );
         })
         // .on("mousemove", function(d,i) {
         //   $("#infobox").html("<b>" + d.name + ":</b> " + d.sentiment);

@@ -3,7 +3,6 @@ var smileys = require('./smiley.js');
 var Twit = require('twit');
 var io = require('socket.io');
 var express = require('express');
-var routes = require('./routes');
 var http = require('http');
 var path = require('path');
 var fs = require('fs');
