@@ -6,6 +6,8 @@ var express = require('express');
 var routes = require('./routes');
 var http = require('http');
 var path = require('path');
+var fs = require('fs');
+var csv = require('csv')
 
 // Express
 var app = express();
@@ -20,7 +22,18 @@ app.use(express.methodOverride());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/', routes.index);
+
+csv().from.path('countries.tsv', {delimiter: '\t', escape:'"'}).to.array(function(data){
+  var countryDict = {};
+  
+  for(var i = 0; i<data.length; i++){
+    countryDict[data[i][1]] = [data[i][0], data[i][2]];
+  }
+
+  app.get('/', function(req,res){
+    res.render('index', { title: 'Data Engineering: Task 3', countryDict: JSON.stringify(countryDict), countryInfoDict: JSON.stringify(data) });
+  });
+});
 
 var server = http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
@@ -42,6 +55,8 @@ for(var smiley in smileys) keys.push(smiley);
 
 var stream = twitter.stream('statuses/filter', { track: keys });
 
+
+
 sockets.sockets.on('connection', function(socket){
   stream.on('tweet', function (tweet) {
     if (tweet.text != null && tweet.place != null && tweet.place.country_code != null) {
@@ -50,7 +65,7 @@ sockets.sockets.on('connection', function(socket){
       tokens.forEach(function(token) {
         for ( var smiley in smileys ) {
           if (smiley == token) {
-            sentiment = smileys[smiley];
+            sentiment += smileys[smiley];
             break;
           }
         }
@@ -59,4 +74,3 @@ sockets.sockets.on('connection', function(socket){
     }
   });
 });
-

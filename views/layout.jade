@@ -1,16 +1,20 @@
 doctype html
 html
-  head
-    title= title
-    link(rel='stylesheet', href='/stylesheets/bootstrap.min.css')
-    link(rel='stylesheet', href='/stylesheets/style.css')
-    script(src='/socket.io/socket.io.js')
+    head
+        title= title
+        link(rel='stylesheet', href='/stylesheets/bootstrap.min.css')
+        link(rel='stylesheet', href='/stylesheets/style.css')
+        script(src='/socket.io/socket.io.js')
+        script.
+            countryNameDict = !{countryDict};
+            worldCountryNames = !{countryInfoDict};
+    body
+        block content
+
     script(src='/javascripts/jquery.min.js')
+    script(src='/javascripts/jquery-csv.min.js')
     script(src='/javascripts/d3.min.js')
     script(src='/javascripts/topojson.js')
     script(src='/javascripts/queue.min.js')
     script(src='/javascripts/bootstrap.min.js')
     script(src='/javascripts/script.js')
-  body
-    block content
-
