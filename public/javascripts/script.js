@@ -23,7 +23,7 @@ var CountrySentiment = function(data, countryInfo){
     };
 
     var addNegative = function(negative){
-        that.negative += negative;
+        that.negative -= negative;
         addCount(1);
         calcAvg();
     };
@@ -89,7 +89,28 @@ $(function () {
     }
 
     var updateSmileyBox = function(obj){
-      $("#smiley-box").html("<b>Country: </b>" + obj.countryName + "<br/><b>Positive: </b> "+ obj.positive + "<br/><b>Negative: </b> "+ obj.negative + "<br/><b>Neutral: </b> "+ obj.neutral);
+      $("#smiley-box").html("<b>Country: </b>" + obj.countryName + "<br><br><svg id='chart' width='250' height='250'></svg><br>neutral: <b>" + obj.neutral + " </b> - positive: <b>" + obj.positive + "</b> - negative: <b>" + obj.negative + "</b>");
+
+      var cScale = d3.scale.linear().domain([0, obj.positive+obj.neutral+obj.negative]).range([0, 2 * Math.PI]);
+      data = [[0, obj.positive, "#3c763d"], [obj.positive, obj.positive+obj.neutral, "#ffffff"], [obj.positive+obj.neutral, obj.positive+obj.neutral+obj.negative, "#a94442"]]
+      var vis = d3.select("#chart");
+
+      var arc = d3.svg.arc()
+        .innerRadius(60)
+        .outerRadius(110)
+        .startAngle(function(d){return cScale(d[0]);})
+        .endAngle(function(d){return cScale(d[1]);});
+
+      vis.selectAll("path")
+        .data(data)
+        .enter()
+        .append("path")
+        .attr("d", arc)
+        .attr("stroke", "black")
+        .attr("stroke-width", "0.3")
+        .attr("class", "slice")
+        .style("fill", function(d){return d[2];})
+        .attr("transform", "translate(110,110)");
     }
 
     var clearTweets = function(){
