@@ -6,3 +6,23 @@ body {
 a {
   color: #00B7FF;
 }
+
+button{
+    color: #000000;
+    background-color: #FFFFFF;
+}
+
+button:hover{
+    color: #FF0000;
+    background-color: #000000;
+}
+
+button.toggled{
+    color: #FFFFFF;
+    background-color: #000000;
+}
+
+#tweet-stream{
+    height:200px;
+    overflow:scroll;
+}

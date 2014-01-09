@@ -1,6 +1,7 @@
 var maxSentiment    = 0,
     minSentiment    = 0,
-    tweetCount      = 0
+    tweetCount      = 0,
+    currentCountry = null,
     world_50m=null;
 
 var CountrySentiment = function(data, countryInfo){
@@ -29,6 +30,7 @@ var CountrySentiment = function(data, countryInfo){
 
     var addNeutral = function(neutral){
         that.neutral += 1;
+        addCount(1);
     };
 
     var addCount = function(cnt){
@@ -66,9 +68,13 @@ $(function () {
 
     socket.on("tweet", function(d){
       var data = JSON.parse(d);
-      console.log(data);
+      if(currentCountry == data.code){
+        updateSmileyBox(countrySentimentDict[data.code]);
+      }
+      $("#tweet-stream").prepend("<b>Country: </b>"+ countryNameDict[data.code][1] +" Sentiment: "+data.sentiment+"<br/>");
       addSentiment(data);
     })
+
 
     var addSentiment = function(data){
         var countrySentiment =  countrySentimentDict[data.code];
@@ -80,6 +86,15 @@ $(function () {
             countrySentimentDict[data.code] = cs;
             countrySentimentDictNumericKey[ parseInt(countryNameDict[data.code][0]) ] = cs;
         }
+    }
+
+    var updateSmileyBox = function(obj){
+      $("#smiley-box").html("<b>Country: </b>" + obj.countryName + "<br/><b>Positive: </b> "+ obj.positive + "<br/><b>Negative: </b> "+ obj.negative + "<br/><b>Neutral: </b> "+ obj.neutral);
+    }
+
+    var clearTweets = function(){
+      countrySentimentDict = {};
+      countrySentimentDictNumericKey = {};
     }
 
     var projection = d3.geo.mercator().translate([550, 300]).scale(100);
@@ -102,13 +117,28 @@ $(function () {
       .defer(d3.json, "data/world-50m.json")
       .await(ready);
 
+    var setColor = function(country){
+        country
+          .attr("fill-opacity", 
+            function(d, i) {
+              var tmpCountry = countrySentimentDictNumericKey[d.id];
+              if( tmpCountry !== undefined && $("#neu").hasClass("toggled") && tmpCountry.avg==0){return 1}
+              return ((d.color > 0)? (1/maxSentiment)*d.color : ((d.color < 0)? (1/minSentiment)*d.color : 1)); })
+          .style("fill", 
+            function(d, i) {
+              var tmpCountry = countrySentimentDictNumericKey[d.id];
+              if(tmpCountry !== undefined && $("#neu").hasClass("toggled") && tmpCountry.avg==0){return "#0000ff"}
+              return ((d.color > 0 && $("#pos").hasClass("toggled")) ? "#3c763d" : ((d.color < 0 && $("#neg").hasClass("toggled")) ? "#a94442" : "#ffffff")); });
+    }
+
     function ready(error, world) {
       var countries = topojson.object(world, world.objects.countries).geometries;
       var country = svg.selectAll(".country").data(countries);
 
       country
-       .enter()
+        .enter()
         .insert("path")
+        .attr("name", worldCountryNames[country.id] )
         .attr("class", "country")
         .attr("title", function(d, i) { return d.name; })
         .attr("d", path)
@@ -120,8 +150,9 @@ $(function () {
       setInterval(function() {
         countries.forEach(function(d) {
           var country = countrySentimentDictNumericKey[d.id];
+
           if (typeof country === "undefined"){
-            d.name = "Undefined";
+            d.name = worldCountryNames[d.id];
             d.sentiment = "no sentiment data available";
             d.color = 0;
           } else {
@@ -132,19 +163,20 @@ $(function () {
           }
         });
 
-        country
-          .attr("fill-opacity", function(d, i) { return ((d.color > 0)? (1/maxSentiment)*d.color : ((d.color < 0)? (1/minSentiment)*d.color : 1)); })
-          .style("fill", function(d, i) { return ((d.color > 0)? "#3c763d" : ((d.color < 0)? "#a94442" : "#ffffff")); });
+        setColor(country);
       
       }, 1000);
 
       //var country = svg.selectAll(".country").data(countries);
 
-      
-
       country
         .on("mousedown", function(d,i){
-            $("#infobox").html("<b>" + d.name + ":</b> " +i ); //+" "+ JSON.stringify(countrySentimentDictNumericKey[i].countryName) );
+          if(countrySentimentDictNumericKey[d.id]===undefined){
+            //$("#smiley-box").html("<b>Country: </b>" + d.name + "<br/><b>Positive: </b>No Data<br/><b>Negative: </b> No Data<br/><b>Neutral: </b>No Data");
+          }else{
+            currentCountry = countrySentimentDictNumericKey[d.id].code;
+            updateSmileyBox(countrySentimentDictNumericKey[d.id]);
+          }
         })
         .on("mousemove", function(d,i) {
            $("#infobox").html("<b>" + d.name + ":</b> " + d.sentiment);
@@ -152,7 +184,28 @@ $(function () {
         .on("mouseout", function(d,i) {
           $("#infobox").html("<b>Info:</b> the map is drag and zoomable");
         });
-
     }
 
+    $("button").click(function(){
+      $(this).toggleClass("toggled");
+    });
+
+    $("#clear-btn").click(function(){
+      clearTweets();
+      $("#smiley-box").html("");
+      $("#tweet-stream").html("");
+    });
+
+    // $("#custom-filter-btn").click(function(){
+    //   socket.emit('changeToCustomFilter', {text: '1'});
+    // });
+
+    // $("#smiley-filter-btn").click(function(){
+    //   socket.emit('changeToSmileyFilter', {text: '1'});
+    // });
+    
+    // $("#add-word-btn").click(function(){
+    //   socket.emit('addToCustomFilter', {text: $("#input-field").val() });
+    //   $("#input-field").val("");
+    // });
 });

@@ -24,13 +24,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 csv().from.path('countries.tsv', {delimiter: '\t', escape:'"'}).to.array(function(data){
   var countryDict = {};
+  var names = {};
   
   for(var i = 0; i<data.length; i++){
+    names[data[i][0]] = data[i][2];
     countryDict[data[i][1]] = [data[i][0], data[i][2]];
   }
 
   app.get('/', function(req,res){
-    res.render('index', { title: 'Data Engineering: Task 3', countryDict: JSON.stringify(countryDict), countryInfoDict: JSON.stringify(data) });
+    res.render('index', { title: 'Visual Analytics', countryDict: JSON.stringify(countryDict), countryInfoDict: JSON.stringify(names) });
   });
 });
 
