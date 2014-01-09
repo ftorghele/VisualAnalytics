@@ -23,7 +23,7 @@ var CountrySentiment = function(data, countryInfo){
     };
 
     var addNegative = function(negative){
-        that.negative -= negative;
+        that.negative += negative;
         addCount(1);
         calcAvg();
     };
@@ -31,6 +31,7 @@ var CountrySentiment = function(data, countryInfo){
     var addNeutral = function(neutral){
         that.neutral += 1;
         addCount(1);
+        calcAvg();
     };
 
     var addCount = function(cnt){
@@ -144,6 +145,13 @@ $(function () {
             function(d, i) {
               var tmpCountry = countrySentimentDictNumericKey[d.id];
               if( tmpCountry !== undefined && $("#neu").hasClass("toggled") && tmpCountry.avg==0){return 1}
+              //Second Method to set the color of a country
+              // if( tmpCountry === undefined ){
+              //   return;
+              // }
+              // var x1 = Math.abs(tmpCountry.negative - tmpCountry.positive);
+              // var color = (10 / Math.min( x1,10)) *d.color
+              // return (d.color > 0) ? color : -1*color})
               return ((d.color > 0)? (1/maxSentiment)*d.color : ((d.color < 0)? (1/minSentiment)*d.color : 1)); })
           .style("fill", 
             function(d, i) {
