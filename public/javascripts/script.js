@@ -97,7 +97,7 @@ $(function () {
       countrySentimentDictNumericKey = {};
     }
 
-    var projection = d3.geo.mercator().translate([550, 300]).scale(100);
+    var projection = d3.geo.mercator().translate([370, 300]).scale(120);
 
     var path = d3.geo.path().projection(projection);
 
