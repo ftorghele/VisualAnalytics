@@ -1,8 +1,0 @@
-module.exports = {
-  'CONSUMER_KEY':        '',
-  'CONSUMER_SECRET':     '',
-  'ACCESS_TOKEN':        '',
-  'ACCESS_TOKEN_SECRET': '',
-  'MONGODB_DB_URL':      'local',
-  'MONGODB_COLLECTIONS': ['tweets', 'va', 'slang_replaced', 'sentiment'],
-};
