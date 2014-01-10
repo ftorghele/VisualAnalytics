@@ -56,8 +56,6 @@ for(var smiley in smileys) keys.push(smiley);
 
 var stream = twitter.stream('statuses/filter', { track: keys });
 
-
-
 sockets.sockets.on('connection', function(socket){
   stream.on('tweet', function (tweet) {
     if (tweet.text != null && tweet.place != null && tweet.place.country_code != null) {

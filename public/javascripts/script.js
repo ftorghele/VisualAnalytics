@@ -76,7 +76,6 @@ $(function () {
       addSentiment(data);
     })
 
-
     var addSentiment = function(data){
         var countrySentiment =  countrySentimentDict[data.code];
 
@@ -92,8 +91,8 @@ $(function () {
     var updateSmileyBox = function(obj){
       $("#smiley-box").html("<b>Country: </b>" + obj.countryName + "<br><br><svg id='chart' width='250' height='250'></svg><br>neutral: <b>" + obj.neutral + " </b> - positive: <b>" + obj.positive + "</b> - negative: <b>" + obj.negative + "</b>");
 
-      var cScale = d3.scale.linear().domain([0, obj.positive+obj.neutral+obj.negative]).range([0, 2 * Math.PI]);
-      data = [[0, obj.positive, "#3c763d"], [obj.positive, obj.positive+obj.neutral, "#ffffff"], [obj.positive+obj.neutral, obj.positive+obj.neutral+obj.negative, "#a94442"]]
+      var cScale = d3.scale.linear().domain([0, obj.positive+obj.neutral+(obj.negative*-1)]).range([0, 2 * Math.PI]);
+      data = [[0, obj.positive, "#3c763d"], [obj.positive, obj.positive+obj.neutral, "#ffffff"], [obj.positive+obj.neutral, obj.positive+obj.neutral+(obj.negative*-1), "#a94442"]]
       var vis = d3.select("#chart");
 
       var arc = d3.svg.arc()
@@ -145,18 +144,12 @@ $(function () {
             function(d, i) {
               var tmpCountry = countrySentimentDictNumericKey[d.id];
               if( tmpCountry !== undefined && $("#neu").hasClass("toggled") && tmpCountry.avg==0){return 1}
-              //Second Method to set the color of a country
-              // if( tmpCountry === undefined ){
-              //   return;
-              // }
-              // var x1 = Math.abs(tmpCountry.negative - tmpCountry.positive);
-              // var color = (10 / Math.min( x1,10)) *d.color
-              // return (d.color > 0) ? color : -1*color})
+              if( !$("#pos").hasClass("toggled") && !$("#neg").hasClass("toggled") && !$("#neu").hasClass("toggled") ){return 1}
               return ((d.color > 0)? (1/maxSentiment)*d.color : ((d.color < 0)? (1/minSentiment)*d.color : 1)); })
           .style("fill", 
             function(d, i) {
               var tmpCountry = countrySentimentDictNumericKey[d.id];
-              if(tmpCountry !== undefined && $("#neu").hasClass("toggled") && tmpCountry.avg==0){return "#0000ff"}
+              if(tmpCountry !== undefined && $("#neu").hasClass("toggled") && tmpCountry.avg==0){return "#31708f"}
               return ((d.color > 0 && $("#pos").hasClass("toggled")) ? "#3c763d" : ((d.color < 0 && $("#neg").hasClass("toggled")) ? "#a94442" : "#ffffff")); });
     }
 
@@ -195,13 +188,9 @@ $(function () {
         setColor(country);
       
       }, 1000);
-
-      //var country = svg.selectAll(".country").data(countries);
-
       country
         .on("mousedown", function(d,i){
           if(countrySentimentDictNumericKey[d.id]===undefined){
-            //$("#smiley-box").html("<b>Country: </b>" + d.name + "<br/><b>Positive: </b>No Data<br/><b>Negative: </b> No Data<br/><b>Neutral: </b>No Data");
           }else{
             currentCountry = countrySentimentDictNumericKey[d.id].code;
             updateSmileyBox(countrySentimentDictNumericKey[d.id]);
@@ -225,16 +214,4 @@ $(function () {
       $("#tweet-stream").html("");
     });
 
-    // $("#custom-filter-btn").click(function(){
-    //   socket.emit('changeToCustomFilter', {text: '1'});
-    // });
-
-    // $("#smiley-filter-btn").click(function(){
-    //   socket.emit('changeToSmileyFilter', {text: '1'});
-    // });
-    
-    // $("#add-word-btn").click(function(){
-    //   socket.emit('addToCustomFilter', {text: $("#input-field").val() });
-    //   $("#input-field").val("");
-    // });
 });
